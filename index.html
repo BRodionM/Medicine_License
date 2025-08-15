@@ -1,71 +1,91 @@
+<style>
+  details.service { border: 1px solid #eee; border-radius: 8px; padding: 8px 12px; margin: 12px 0;}
+  details.service[open] { background: #fafafa; }
+  details.service summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.service summary::-webkit-details-marker { display: none; }
+  details.service .meta { margin-top: 8px; font-size: 0.95em; color: #444; }
+  details.service .meta b { display:inline-block; min-width: 150px; color:#222;}
+  .price { margin-left:auto; white-space: nowrap; }
+</style>
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Калькулятор услуг для клиник</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-        h2 { color: #333; }
-        label { display: block; margin: 10px 0; }
-        input[type="number"] { width: 60px; margin-left: 10px; }
-        hr { margin: 30px 0; }
-        #total { font-size: 1.5em; color: #006400; }
-    </style>
-</head>
-<body>
-    <h2>Калькулятор стоимости услуг</h2>
-    <form id="priceCalc">
-        <label><input type="checkbox" data-price="5000"> Регистрация и получение доступа к системам ФРМО/ФРМР — <strong>5 000 ₽</strong></label>
+<form id="priceCalc">
 
-        <label><input type="checkbox" data-price="7000"> ФРМО – заполнение обязательной информации об организации — <strong>7 000 ₽</strong></label>
+  <!-- 1) Регистрация/доступ ФРМО/ФРМР -->
+  <details class="service">
+    <summary>
+      <input type="checkbox" data-price="5000">
+      <span>Регистрация и доступ к ФРМО/ФРМР</span>
+      <span class="price"><strong>5 000 ₽</strong></span>
+    </summary>
+    <div class="meta">
+      <div><b>Нормативка:</b> Федеральный закон № 323-ФЗ; требования ЕГИСЗ; приказы Минздрава по ведению ФРМО/ФРМР.</div>
+      <div><b>Кто проверяет:</b> Росздравнадзор (и региональные органы), Минздрав.</div>
+      <div><b>Штрафы/риски:</b> нарушение лицензионных требований (КоАП РФ ст. 14.1) — для юрлиц 100 000–200 000 ₽
+        или приостановка до 90 суток; также предписания об устранении нарушений.</div>
+    </div>
+  </details>
 
-        <label>ФРМР – внесение сотрудников:
-            <input type="number" id="frmrCount" value="0" min="0"> × 1 300 ₽ = <span id="frmrTotal">0</span> ₽
-        </label>
+  <!-- 2) ФРМР – внесение сотрудников (с количественной опцией) -->
+  <details class="service">
+    <summary>
+      <span>ФРМР – внесение сотрудников</span>
+      <span class="price">
+        <input type="number" id="frmrCount" value="0" min="0" style="width:70px;margin:0 6px;">
+        × 1 300 ₽ = <span id="frmrTotal">0</span> ₽
+      </span>
+    </summary>
+    <div class="meta">
+      <div><b>Нормативка:</b> Федеральный закон № 323-ФЗ; приказ Минздрава о ведении ФРМР; требования ЕГИСЗ.</div>
+      <div><b>Кто проверяет:</b> Росздравнадзор.</div>
+      <div><b>Штрафы/риски:</b> невнесение/несвоевременное внесение сведений = нарушение лицензионных требований
+        (КоАП ст. 14.1): юрлица 100 000–200 000 ₽ или приостановка деятельности до 90 суток; предписания.</div>
+    </div>
+  </details>
 
-        <label>ФРМО – внесение стандартов оснащения:
-            <input type="number" id="frmoCount" value="0" min="0"> × 700 ₽ = <span id="frmoTotal">0</span> ₽
-        </label>
+  <!-- 3) Минимальная услуга по ПДн/РКН -->
+  <details class="service">
+    <summary>
+      <input type="checkbox" data-price="5000">
+      <span>Проверка и регистрация в реестре Роскомнадзора (ПДн)</span>
+      <span class="price"><strong>5 000 ₽</strong></span>
+    </summary>
+    <div class="meta">
+      <div><b>Нормативка:</b> ФЗ № 152-ФЗ «О персональных данных», ст. 22 (уведомление); Приказ РКН № 180 от 28.10.2022 (форма уведомления).</div>
+      <div><b>Кто проверяет:</b> Роскомнадзор (реестр операторов ПДн).</div>
+      <div><b>Штрафы/риски:</b> отсутствие/недостоверность уведомления — КоАП ст. 13.11 (в т.ч. ч. 10): для ИП/юрлиц
+        100 000–300 000 ₽; для должностных лиц 30 000–50 000 ₽. При системных нарушениях и утечках возможны более жёсткие санкции по ст. 13.11.</div>
+    </div>
+  </details>
 
-        <label><input type="checkbox" data-price="2000"> Аудит подсистем ФРМО/ФРМР — <strong>2 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="22000"> Создание сайта по 79-ФЗ — <strong>22 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="2000"> Регистрация в Честном знаке — <strong>2 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="4000"> Регистрация в МДЛП — <strong>4 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="3500"> Регистрация в Фарма.Просто — <strong>3 500 ₽</strong></label>
-        <label><input type="checkbox" data-price="10000"> Внедрение МИС — <strong>10 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="15000"> Подключение к подсистеме РЭМД — <strong>15 000 ₽</strong></label>
-        <label><input type="checkbox" data-price="1500"> Подача заявления на лицензию — <strong>1 500 ₽</strong></label>
-    </form>
-    <hr>
-    <p><strong>Итого:</strong> <span id="total">0</span> ₽</p>
+  <!-- 4) Подключение к РЭМД -->
+  <details class="service">
+    <summary>
+      <input type="checkbox" data-price="15000">
+      <span>Подключение к подсистеме РЭМД</span>
+      <span class="price"><strong>15 000 ₽</strong></span>
+    </summary>
+    <div class="meta">
+      <div><b>Нормативка:</b> ФЗ № 323-ФЗ; приказы Минздрава по РЭМД (напр. № 885н — порядок ведения РЭМД); требования ЕГИСЗ.</div>
+      <div><b>Кто проверяет:</b> Росздравнадзор/Минздрав; сверка с ЕГИСЗ.</div>
+      <div><b>Штрафы/риски:</b> неисполнение требований по передаче СЭМД — квалифицируется как нарушение условий лицензии
+        (КоАП ст. 14.1): юрлица 100 000–200 000 ₽ или приостановка до 90 суток; предписания и повторные проверки.</div>
+    </div>
+  </details>
 
-    <script>
-        function updateTotal() {
-            let total = 0;
+  <!-- оставшиеся услуги можно оставить как были, либо по образцу обернуть в <details class="service">… -->
+  <!-- Примеры из твоего списка: -->
+  <details class="service">
+    <summary>
+      <input type="checkbox" data-price="7000">
+      <span>ФРМО – заполнение обязательной информации об организации</span>
+      <span class="price"><strong>7 000 ₽</strong></span>
+    </summary>
+    <div class="meta">
+      <div><b>Нормативка:</b> ФЗ № 323-ФЗ; методические и ведомственные требования ЕГИСЗ (ФРМО).</div>
+      <div><b>Кто проверяет:</b> Росздравнадзор.</div>
+      <div><b>Штрафы/риски:</b> как нарушение лицензионных требований (КоАП ст. 14.1): 100 000–200 000 ₽ / приостановка.</div>
+    </div>
+  </details>
 
-            document.querySelectorAll('#priceCalc input[type=checkbox]').forEach(el => {
-                if (el.checked) total += parseInt(el.dataset.price);
-            });
-
-            const frmrCount = parseInt(document.getElementById("frmrCount").value) || 0;
-            const frmoCount = parseInt(document.getElementById("frmoCount").value) || 0;
-
-            const frmrTotal = frmrCount * 1300;
-            const frmoTotal = frmoCount * 700;
-
-            document.getElementById("frmrTotal").innerText = frmrTotal.toLocaleString("ru-RU");
-            document.getElementById("frmoTotal").innerText = frmoTotal.toLocaleString("ru-RU");
-
-            total += frmrTotal + frmoTotal;
-
-            document.getElementById("total").innerText = total.toLocaleString("ru-RU");
-        }
-
-        document.querySelectorAll('#priceCalc input').forEach(el => {
-            el.addEventListener('input', updateTotal);
-            el.addEventListener('change', updateTotal);
-        });
-    </script>
-</body>
-</html>
+  <!-- Твои прочие чекбоксы (сайт по 79-ФЗ, ЧЗ, МДЛП, Фарма.Просто, МИС и т.д.) можно обернуть по тому же шаблону -->
+</form>
