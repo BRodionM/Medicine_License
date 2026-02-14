@@ -1,198 +1,265 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Калькулятор услуг для клиник</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Noto Sans',sans-serif; max-width: 900px; margin: auto; padding: 24px; line-height: 1.45; color:#222; }
-    h2 { color: #111; margin-bottom: 6px; }
-    p.lead { margin-top: 0; color:#555; }
-    hr { margin: 24px 0; }
-    #total { font-size: 1.6em; color: #0b6b2f; font-weight: 700; }
-    .service { border: 1px solid #eee; border-radius: 10px; padding: 10px 12px; margin: 12px 0; background:#fff; }
-    .service summary { cursor: default; list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-    .service summary::-webkit-details-marker { display: none; }
-    .service .title { font-weight: 600; }
-    .service .price { margin-left: auto; white-space: nowrap; font-weight: 700; }
-    .qty-wrap { display: inline-flex; align-items: center; gap: 6px; }
-    input[type="number"] { width: 80px; padding: 4px 6px; border:1px solid #ccc; border-radius: 6px; }
-    input[type="checkbox"] { transform: translateY(1px); }
-    .muted { color:#666; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ипотечный калькулятор</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Темная тема (Gemini Style) */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #131314; /* Очень темный серый фон */
+            color: #E3E3E3; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+        
+        /* Карточки */
+        .card { 
+            background: #1E1F20; /* Чуть светлее фон карточек */
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+        }
+        
+        /* Тексты */
+        .label { font-size: 13px; color: #9AA0A6; margin-bottom: 8px; display: block; }
+        .input-wrapper { 
+            display: flex; 
+            align-items: center; 
+            background: #2D2E30; /* Фон полей ввода */
+            border-radius: 10px; 
+            padding: 12px; 
+            border: 1px solid #444746;
+        }
+        .input-wrapper input, .input-wrapper select { 
+            background: transparent; 
+            border: none; 
+            font-size: 18px; 
+            color: #fff; 
+            width: 100%; 
+            outline: none; 
+            font-weight: 500;
+        }
+        .suffix { color: #9AA0A6; font-size: 16px; margin-left: 5px; }
+        
+        /* Слайдеры */
+        input[type=range] { 
+            width: 100%; 
+            margin-top: 15px; 
+            accent-color: #8AB4F8; /* Голубой цвет как у Google */
+            cursor: pointer; 
+            background: transparent;
+        }
+
+        /* Выпадающий список (барабан на iPhone) */
+        select { -webkit-appearance: none; appearance: none; }
+        
+        /* Результаты */
+        .results { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .result-item { margin-bottom: 10px; }
+        .res-value { font-size: 20px; font-weight: bold; display: block; color: #E3E3E3; }
+        .res-label { font-size: 12px; color: #9AA0A6; }
+        
+        .green-text { color: #8AB4F8; } /* Голубой акцент */
+        .main-payment { font-size: 32px; margin-bottom: 5px; color: #A8C7FA; }
+        
+        /* Кнопка ссылки на канал */
+        .link-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 10px;
+            color: #8AB4F8;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #444746;
+            border-radius: 12px;
+            background: #1E1F20;
+        }
+    </style>
 </head>
 <body>
-  <h2>Калькулятор стоимости услуг</h2>
-  <p class="lead muted">Выберите необходимые услуги, чтобы рассчитать итоговую стоимость.</p>
 
-  <form id="priceCalc">
+<div class="container">
+    <!-- Блок ввода -->
+    <div class="card">
+        <div class="input-group" style="margin-bottom: 20px;">
+            <span class="label">Стоимость недвижимости</span>
+            <div class="input-wrapper">
+                <input type="number" id="price" value="4000000">
+                <span class="suffix">₽</span>
+            </div>
+            <input type="range" id="priceRange" min="500000" max="30000000" step="100000" value="4000000">
+        </div>
 
-    <!-- Регистрация и доступ ФРМО/ФРМР -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="5000" />
-        <span class="title">Регистрация и получение доступа к системам ФРМО/ФРМР</span>
-        <span class="price">5&nbsp;000&nbsp;₽</span>
-      </summary>
+        <div class="input-group" style="margin-bottom: 20px;">
+            <span class="label">Первоначальный взнос</span>
+            <div class="input-wrapper">
+                <input type="number" id="initial" value="2500000">
+                <span class="suffix">₽</span>
+            </div>
+            <input type="range" id="initialRange" min="0" max="4000000" step="50000" value="2500000">
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <!-- Срок (Выпадающий список) -->
+            <div class="input-group" style="flex: 1;">
+                <span class="label">Срок</span>
+                <div class="input-wrapper">
+                    <select id="years">
+                        <!-- Опции добавятся скриптом -->
+                    </select>
+                </div>
+            </div>
+            <!-- Ставка -->
+            <div class="input-group" style="flex: 1;">
+                <span class="label">Ставка</span>
+                <div class="input-wrapper">
+                    <input type="number" id="rate" value="10.5">
+                    <span class="suffix">%</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- ФРМО – заполнение обязательной информации -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="7000" />
-        <span class="title">ФРМО – заполнение обязательной информации об организации</span>
-        <span class="price">7&nbsp;000&nbsp;₽</span>
-      </summary>
+    <!-- Блок результатов -->
+    <div class="card">
+        <div class="result-item" style="border-bottom: 1px solid #444746; padding-bottom: 15px; margin-bottom: 15px;">
+            <span class="res-value main-payment" id="monthlyPayment">0 ₽</span>
+            <span class="res-label">Ежемесячный платеж</span>
+        </div>
+
+        <div class="results">
+            <div class="result-item">
+                <span class="res-value" id="loanAmount">0 ₽</span>
+                <span class="res-label">Сумма кредита</span>
+            </div>
+            <div class="result-item">
+                <span class="res-value" id="totalPayout">0 ₽</span>
+                <span class="res-label">Общая выплата</span>
+            </div>
+            <div class="result-item">
+                <span class="res-value" id="overpayment">0 ₽</span>
+                <span class="res-label">Переплата</span>
+            </div>
+             <div class="result-item">
+                <span class="res-value" id="incomeReq">0 ₽</span>
+                <span class="res-label">Нужный доход</span>
+            </div>
+        </div>
     </div>
 
-    <!-- ФРМР – внесение сотрудников (количество) -->
-    <div class="service">
-      <summary>
-        <span class="title">ФРМР – внесение сотрудников</span>
-        <span class="price qty-wrap">
-          <input type="number" id="frmrCount" value="0" min="0" /> × 1&nbsp;300&nbsp;₽ = <span id="frmrTotal">0</span>&nbsp;₽
-        </span>
-      </summary>
-    </div>
+    <!-- Кнопка перехода в канал (опционально внутри WebApp) -->
+    <a href="https://t.me/agentyanaa" class="link-btn" onclick="tg.close()">
+        📢 Канал Яны Рачковской
+    </a>
+</div>
 
-    <!-- ФРМО – стандарты оснащения (количество) -->
-    <div class="service">
-      <summary>
-        <span class="title">ФРМО – внесение стандартов оснащения</span>
-        <span class="price qty-wrap">
-          <input type="number" id="frmoCount" value="0" min="0" /> × 700&nbsp;₽ = <span id="frmoTotal">0</span>&nbsp;₽
-        </span>
-      </summary>
-    </div>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <!-- Аудит подсистем ФРМО/ФРМР -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="2500" />
-        <span class="title">Аудит подсистем ФРМО/ФРМР</span>
-        <span class="price">2&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Сайт по 79-ФЗ -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="22000" />
-        <span class="title">Создание сайта по требованиям ст. 79 ФЗ-323</span>
-        <span class="price">22&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Честный ЗНАК -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="3000" />
-        <span class="title">Регистрация в «Честном знаке»</span>
-        <span class="price">2&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- МДЛП -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="4000" />
-        <span class="title">Регистрация в МДЛП</span>
-        <span class="price">4&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Фарма.Просто -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="4000" />
-        <span class="title">Регистрация в «Фарма.Просто»</span>
-        <span class="price">3&nbsp;500&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Внедрение МИС -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="10000" />
-        <span class="title">Внедрение МИС</span>
-        <span class="price">10&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Подключение к РЭМД -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="15000" />
-        <span class="title">Подключение к подсистеме РЭМД</span>
-        <span class="price">15&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Подача заявления на лицензию -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="1500" />
-        <span class="title">Подача заявления на лицензию</span>
-        <span class="price">1&nbsp;500&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- Прейскурант -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="5000" />
-        <span class="title">Подготовка и размещение актуального прейскуранта по Приказу № 804н</span>
-        <span class="price">5&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-    <!-- ПДн / Роскомнадзор -->
-    <div class="service">
-      <summary>
-        <input type="checkbox" data-price="20000" />
-        <span class="title">Проверка и регистрация в реестре Роскомнадзора (ПДн)</span>
-        <span class="price">5&nbsp;000&nbsp;₽</span>
-      </summary>
-    </div>
-
-  </form>
-
-  <hr />
-  <p><strong>Итого:</strong> <span id="total">0</span> ₽</p>
-
-  <script>
-    function updateTotal() {
-      let total = 0;
-
-      // чекбоксы
-      document.querySelectorAll('#priceCalc input[type=checkbox]').forEach(el => {
-        if (el.checked) total += parseInt(el.dataset.price, 10);
-      });
-
-      // количественные услуги
-      const frmrCount = parseInt(document.getElementById("frmrCount").value, 10) || 0;
-      const frmoCount = parseInt(document.getElementById("frmoCount").value, 10) || 0;
-
-      const frmrTotal = frmrCount * 1300;
-      const frmoTotal = frmoCount * 700;
-
-      document.getElementById("frmrTotal").innerText = frmrTotal.toLocaleString("ru-RU");
-      document.getElementById("frmoTotal").innerText = frmoTotal.toLocaleString("ru-RU");
-
-      total += frmrTotal + frmoTotal;
-
-      document.getElementById("total").innerText = total.toLocaleString("ru-RU");
+    // Заполняем выпадающий список годами (от 1 до 30)
+    const yearsSelect = document.getElementById('years');
+    for (let i = 1; i <= 30; i++) {
+        let option = document.createElement('option');
+        option.value = i;
+        option.text = i + (i === 1 ? ' год' : (i >= 2 && i <= 4 ? ' года' : ' лет'));
+        if (i === 20) option.selected = true; // По умолчанию 20 лет
+        yearsSelect.appendChild(option);
     }
 
-    // навесим обработчики на все интерактивные элементы
-    document.querySelectorAll('#priceCalc input').forEach(el => {
-      el.addEventListener('input', updateTotal);
-      el.addEventListener('change', updateTotal);
+    // Элементы
+    const inputs = {
+        price: document.getElementById('price'),
+        priceRange: document.getElementById('priceRange'),
+        initial: document.getElementById('initial'),
+        initialRange: document.getElementById('initialRange'),
+        years: document.getElementById('years'),
+        rate: document.getElementById('rate')
+    };
+
+    const outputs = {
+        monthly: document.getElementById('monthlyPayment'),
+        loan: document.getElementById('loanAmount'),
+        total: document.getElementById('totalPayout'),
+        overpayment: document.getElementById('overpayment'),
+        income: document.getElementById('incomeReq')
+    };
+
+    const fmt = (num) => new Intl.NumberFormat('ru-RU').format(Math.round(num)) + ' ₽';
+
+    // Глобальные переменные для данных расчета
+    let calcData = {};
+
+    function calculate() {
+        let price = parseFloat(inputs.price.value) || 0;
+        let initial = parseFloat(inputs.initial.value) || 0;
+        let years = parseFloat(inputs.years.value) || 0;
+        let rate = parseFloat(inputs.rate.value) || 0;
+
+        // Синхронизация
+        inputs.priceRange.value = price;
+        inputs.initialRange.max = price;
+        inputs.initialRange.value = initial;
+
+        if (initial > price) { initial = price; inputs.initial.value = price; }
+
+        let loanAmount = price - initial;
+        let months = years * 12;
+        let monthlyRate = rate / 12 / 100;
+        let monthlyPayment = 0;
+        
+        if (loanAmount > 0 && months > 0) {
+            if (monthlyRate === 0) monthlyPayment = loanAmount / months;
+            else monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+        }
+
+        let totalPayout = monthlyPayment * months;
+        let overpayment = totalPayout - loanAmount;
+        let incomeReq = monthlyPayment * 1.6; // Примерный доход (платеж * 1.6)
+
+        outputs.monthly.innerText = fmt(monthlyPayment);
+        outputs.loan.innerText = fmt(loanAmount);
+        outputs.total.innerText = fmt(totalPayout);
+        outputs.overpayment.innerText = fmt(overpayment);
+        outputs.income.innerText = fmt(incomeReq);
+
+        // Сохраняем данные для отправки боту
+        calcData = {
+            price: fmt(price),
+            initial: fmt(initial),
+            years: years,
+            rate: rate,
+            monthly: fmt(monthlyPayment),
+            loan: fmt(loanAmount),
+            overpayment: fmt(overpayment),
+            total: fmt(totalPayout)
+        };
+    }
+
+    // Настраиваем ГЛАВНУЮ КНОПКУ (MainButton) внизу экрана Telegram
+    tg.MainButton.setText("ЗАФИКСИРОВАТЬ РАСЧЕТЫ ✅");
+    tg.MainButton.show();
+    tg.MainButton.onClick(function() {
+        // Отправляем данные обратно боту
+        tg.sendData(JSON.stringify(calcData));
     });
 
-    // первичный пересчёт
-    updateTotal();
-  </script>
+    // Слушатели
+    inputs.price.oninput = () => { inputs.priceRange.value = inputs.price.value; calculate(); };
+    inputs.priceRange.oninput = () => { inputs.price.value = inputs.priceRange.value; calculate(); };
+    inputs.initial.oninput = () => { inputs.initialRange.value = inputs.initial.value; calculate(); };
+    inputs.initialRange.oninput = () => { inputs.initial.value = inputs.initialRange.value; calculate(); };
+    inputs.years.onchange = calculate; // Для select используем onchange
+    inputs.rate.oninput = calculate;
 
+    calculate();
+</script>
 </body>
 </html>
