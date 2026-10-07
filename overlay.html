@@ -53,38 +53,65 @@
             pointer-events: none;
         }
 
-        .base { z-index: 1; }
-
-        /* Тихий сдвиг того же кадра — второй проход по фигуре и брусчатке. */
-        .echo {
-            z-index: 2;
-            transform: translate(1.8%, -0.8%);
-            mix-blend-mode: soft-light;
-            opacity: 0.7;
+        .base {
+            z-index: 1;
+            transform-origin: 62% 58%;
+            animation: photo-drift 14s ease-in-out infinite alternate;
         }
 
-        /* Повтор кадра распускается из вывески свечением, без второй читаемой строки. */
+        /* Второй проход кадра едет навстречу основному — фигура и брусчатка расходятся. */
+        .echo {
+            z-index: 2;
+            mix-blend-mode: soft-light;
+            transform-origin: 40% 70%;
+            animation: echo-drift 18s ease-in-out infinite alternate;
+        }
+
+        /* Свечение вывески медленно плывёт вверх по кирпичу. */
         .ghost {
             z-index: 2;
-            transform: scale(1.22);
             transform-origin: 32% 24%;
             mix-blend-mode: screen;
-            opacity: 0.32;
             filter: blur(14px) saturate(1.7) brightness(1.2);
             -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 30%, transparent 58%);
             mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 30%, transparent 58%);
+            animation: ghost-drift 16s ease-in-out infinite alternate;
         }
 
-        /* Мягкое свечение вывески поверх стекла. */
+        /* Неон дышит отдельно от кадра. */
         .bloom {
             z-index: 3;
-            transform: scale(1.18);
             transform-origin: 34% 26%;
             filter: blur(36px) brightness(1.55) saturate(1.7);
             mix-blend-mode: screen;
-            opacity: 0.42;
             -webkit-mask-image: radial-gradient(ellipse 70% 28% at 34% 25%, #000 0%, rgba(0, 0, 0, 0.4) 48%, transparent 76%);
             mask-image: radial-gradient(ellipse 70% 28% at 34% 25%, #000 0%, rgba(0, 0, 0, 0.4) 48%, transparent 76%);
+            animation: bloom-pulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes photo-drift {
+            from { transform: scale(1.14) translate3d(2.6%, 0.8%, 0); }
+            to   { transform: scale(1.22) translate3d(-3.2%, -1.1%, 0); }
+        }
+
+        @keyframes echo-drift {
+            from { transform: scale(1.16) translate3d(-2.4%, 1.4%, 0); opacity: 0.55; }
+            to   { transform: scale(1.24) translate3d(3.1%, -1.6%, 0); opacity: 0.78; }
+        }
+
+        @keyframes ghost-drift {
+            from { transform: scale(1.22) translate3d(1.2%, 0.4%, 0); opacity: 0.24; }
+            to   { transform: scale(1.34) translate3d(-1.8%, -2.2%, 0); opacity: 0.42; }
+        }
+
+        @keyframes bloom-pulse {
+            from { transform: scale(1.14); opacity: 0.3; }
+            to   { transform: scale(1.3); opacity: 0.55; }
+        }
+
+        @keyframes grain-shift {
+            from { background-position: 0 0; }
+            to   { background-position: 190px -140px; }
         }
 
         .grade {
@@ -120,6 +147,22 @@
             mix-blend-mode: overlay;
             background-image: url("assets/grain.svg");
             background-size: 190px 190px;
+            animation: grain-shift 9s linear infinite alternate;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .base,
+            .echo,
+            .ghost,
+            .bloom,
+            .grain {
+                animation: none;
+            }
+
+            .base { transform: none; }
+            .echo { transform: translate(1.8%, -0.8%); opacity: 0.7; }
+            .ghost { transform: scale(1.22); opacity: 0.32; }
+            .bloom { transform: scale(1.18); opacity: 0.42; }
         }
 
         .frame {
