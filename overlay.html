@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кофе с душой — наслоение</title>
+    <style>
+        @font-face {
+            font-family: "Unbounded";
+            src: url("fonts/Unbounded.ttf") format("truetype");
+            font-weight: 200 900;
+            font-style: normal;
+            font-display: block;
+        }
+        @font-face {
+            font-family: "Cormorant";
+            src: url("fonts/CormorantGaramond-Italic.ttf") format("truetype");
+            font-weight: 300 700;
+            font-style: italic;
+            font-display: block;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            background: #05060a;
+            color: #f4fbff;
+        }
+
+        body {
+            min-height: 100%;
+            display: grid;
+            place-items: center;
+        }
+
+        .poster {
+            position: relative;
+            width: min(100vw, calc(100vh * 3800 / 5552));
+            height: min(100vh, calc(100vw * 5552 / 3800));
+            overflow: hidden;
+            background: #090b10;
+            container-type: size;
+            user-select: none;
+        }
+
+        .layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .base { z-index: 1; }
+
+        /* Тихий сдвиг того же кадра — второй проход по фигуре и брусчатке. */
+        .echo {
+            z-index: 2;
+            transform: translate(1.8%, -0.8%);
+            mix-blend-mode: soft-light;
+            opacity: 0.7;
+        }
+
+        /* Повтор кадра распускается из вывески свечением, без второй читаемой строки. */
+        .ghost {
+            z-index: 2;
+            transform: scale(1.22);
+            transform-origin: 32% 24%;
+            mix-blend-mode: screen;
+            opacity: 0.32;
+            filter: blur(14px) saturate(1.7) brightness(1.2);
+            -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 30%, transparent 58%);
+            mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 30%, transparent 58%);
+        }
+
+        /* Мягкое свечение вывески поверх стекла. */
+        .bloom {
+            z-index: 3;
+            transform: scale(1.18);
+            transform-origin: 34% 26%;
+            filter: blur(36px) brightness(1.55) saturate(1.7);
+            mix-blend-mode: screen;
+            opacity: 0.42;
+            -webkit-mask-image: radial-gradient(ellipse 70% 28% at 34% 25%, #000 0%, rgba(0, 0, 0, 0.4) 48%, transparent 76%);
+            mask-image: radial-gradient(ellipse 70% 28% at 34% 25%, #000 0%, rgba(0, 0, 0, 0.4) 48%, transparent 76%);
+        }
+
+        .grade {
+            z-index: 4;
+            background:
+                radial-gradient(ellipse 72% 36% at 30% 24%, rgba(150, 226, 255, 0.18), transparent 62%),
+                linear-gradient(to top, rgba(5, 6, 12, 0.9) 0%, rgba(5, 6, 12, 0.62) 11%, rgba(5, 6, 12, 0.22) 22%, transparent 34%),
+                linear-gradient(to bottom, rgba(4, 5, 12, 0.42) 0%, transparent 14%),
+                radial-gradient(ellipse at center, transparent 46%, rgba(0, 0, 0, 0.42) 100%);
+        }
+
+        .woven {
+            z-index: 5;
+            position: absolute;
+            left: 5.2%;
+            top: 10%;
+            font-family: "Unbounded", sans-serif;
+            font-weight: 500;
+            font-size: 14.6cqw;
+            letter-spacing: -0.045em;
+            line-height: 0.8;
+            text-transform: uppercase;
+            white-space: nowrap;
+            color: rgba(198, 236, 255, 0.14);
+            -webkit-text-stroke: 0.042cqw rgba(238, 249, 255, 0.9);
+            paint-order: stroke fill;
+            pointer-events: none;
+        }
+
+        .grain {
+            z-index: 6;
+            opacity: 0.22;
+            mix-blend-mode: overlay;
+            background-image: url("assets/grain.svg");
+            background-size: 190px 190px;
+        }
+
+        .frame {
+            z-index: 7;
+            position: absolute;
+            inset: 3.1%;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            pointer-events: none;
+        }
+
+        .copy {
+            z-index: 8;
+            position: absolute;
+            left: 7%;
+            bottom: 6.2%;
+            width: 54%;
+            pointer-events: none;
+        }
+
+        .kicker {
+            font-family: "Unbounded", sans-serif;
+            font-weight: 400;
+            font-size: 2.05cqw;
+            letter-spacing: 0.48em;
+            text-transform: uppercase;
+            color: rgba(244, 247, 250, 0.9);
+        }
+
+        .rule {
+            width: 22%;
+            height: 1px;
+            margin: 1.5cqw 0 1.7cqw;
+            background: linear-gradient(to right, #e7f8ff, rgba(231, 248, 255, 0));
+        }
+
+        .title {
+            font-family: "Unbounded", sans-serif;
+            font-weight: 300;
+            font-size: 9.6cqw;
+            letter-spacing: 0.2em;
+            line-height: 0.86;
+            text-transform: uppercase;
+            color: #d9f6ff;
+        }
+
+        .subtitle {
+            margin-top: -0.12em;
+            margin-left: -0.015em;
+            font-family: "Cormorant", serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 12.4cqw;
+            letter-spacing: -0.03em;
+            line-height: 0.74;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <main class="poster" aria-label="Наслоение фотографии: кофе с душой">
+        <img class="layer base" src="assets/night.jpg" alt="">
+        <img class="layer echo" src="assets/night.jpg" alt="">
+        <img class="layer ghost" src="assets/night.jpg" alt="">
+        <img class="layer bloom" src="assets/night.jpg" alt="">
+        <div class="layer grade"></div>
+        <div class="woven" aria-hidden="true">душа</div>
+        <div class="layer grain"></div>
+        <div class="frame"></div>
+        <div class="copy">
+            <div class="kicker">Дон Хуан</div>
+            <div class="rule"></div>
+            <div class="title">Кофе</div>
+            <div class="subtitle">с душой</div>
+        </div>
+    </main>
+</body>
+</html>
